@@ -1,0 +1,23 @@
+version: '3.5'
+services:
+  planarium:
+    image: ${PLANARIUM}
+    stdin_open: true
+    volumes:
+      - ./genes:/app/genes
+      - ./assets:/app/public/assets
+      - ./.env:/app/child.env
+    environment:
+#      - NODE_ADDRESS={{NODE_ADDRESS}}
+      - ADDRESS=${ADDRESS}
+      - HOST=${HOST}
+      - DOMAIN=${DOMAIN}
+    entrypoint: ["/app/entrypoint.sh"]
+    networks:
+      - planaria
+    ports:
+      - "${PLANARIUM_PORT}:3000"
+networks:
+  planaria:
+    external:
+      name: planaria
