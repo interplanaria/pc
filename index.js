@@ -447,8 +447,6 @@ const init = function() {
                   "KEY="+key.privateKey,
                   "ADDRESS="+key.address
                 ])
-                // 7. Create style.css
-                write.str(childPath, "style.css", "")
                 let compose = {
                   planaria: fs.readFileSync(__dirname + '/stub/planaria.yml', 'utf8'),
                   planarium: fs.readFileSync(__dirname + '/stub/planarium.yml', 'utf8'),
