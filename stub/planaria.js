@@ -5,7 +5,7 @@
 ***************************************/
 module.exports = {
   planaria: '0.0.1',
-  from: HEIGHT,
+  from: 570000,
   name: NAME,
   version: VERSION,
   description: DESCRIPTION,
