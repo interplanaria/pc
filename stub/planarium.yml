@@ -5,7 +5,7 @@ services:
     stdin_open: true
     volumes:
       - ./genes:/app/genes
-      - ./assets:/app/public/assets
+      - ${ASSETS_DIR}:/app/public/assets
       - ./.env:/app/child.env
     environment:
 #      - NODE_ADDRESS={{NODE_ADDRESS}}

@@ -15,6 +15,7 @@ const HOST = "https://planaria.network"
 const spawn = require('child_process').spawn;
 const Docker = require('dockerode');
 const mkdirp = require('mkdirp');
+const path = require('path');
 const docker = new Docker()
 const treeify = require('treeify');
 const homedir = require('os').homedir();
@@ -58,10 +59,12 @@ const ask = {
     planaria: function(cb) {
       let _path = process.cwd()
       inquirer.prompt([
-        { type: 'input', name: 'DATA_DIR', message: "Storage Path?", default: (process.env.DATA_DIR ? process.env.DATA_DIR : './db') },
+        { type: 'input', name: 'DATA_DIR', message: "DB Storage Path?", default: (process.env.DATA_DIR ? process.env.DATA_DIR : './db') },
+        { type: 'input', name: 'ASSETS_DIR', message: "File Serve Assets Storage Path?", default: (process.env.ASSETS_DIR ? process.env.ASSETS_DIR : './assets') },
         { type: 'input', name: 'MAX_MEMORY', message: "Max Memory in GB", default: (process.env.MAX_MEMORY ? process.env.MAX_MEMORY : 1) },
         { type: 'input', name: 'BITCOIN_USER', message: "Bitcoin JSON-RPC Username", default: (process.env.BITCOIN_USER ? process.env.BITCOIN_USER : "root") },
         { type: 'input', name: 'BITCOIN_PASSWORD', message: "Bitcoin JSON-RPC Password", default: (process.env.BITCOIN_PASSWORD ? process.env.BITCOIN_PASSWORD : "bitcoin") },
+        { type: 'confirm', name: 'FAT', message: "[Experimental] Include raw transactions in events? (May consume more memory)", default: false },
       ]).then(function(answers) {
         cb(answers)
       });
@@ -288,16 +291,24 @@ const start = {
       answers.ADDRESS = dirs.join(',')
       answers.HOST = ip.address()
       console.log("update to", answers)
-      
-      updateEnv(answers, function() {
-        console.log("start planaria", originalEnv)
-        let aria = spawn("docker-compose", ["-p", "planaria", "-f", "planaria.yml", "up", "-d"], { stdio: 'inherit' })
-        aria.on('exit', function(code) {
-          console.log("Started planaria", code)
-          if (cb) cb()
-        })
-      })
 
+      let resolvedPath = path.resolve(_path, answers.ASSETS_DIR)
+      console.log("Resolved ASSETS_DIR = ", resolvedPath)
+      mkdirp(resolvedPath, function(err) {
+        if (err) {
+          console.log(err)
+          process.exit()
+        } else {
+          updateEnv(answers, function() {
+            console.log("start planaria", originalEnv)
+            let aria = spawn("docker-compose", ["-p", "planaria", "-f", "planaria.yml", "up", "-d"], { stdio: 'inherit' })
+            aria.on('exit', function(code) {
+              console.log("Started planaria", code)
+              if (cb) cb()
+            })
+          })
+        }
+      })
     })
   },
   planarium: function(cb) {
@@ -453,25 +464,25 @@ const init = function() {
                 }
                 write.str(currentPath, "planaria.yml", compose.planaria)
                 write.str(currentPath, "planarium.yml", compose.planarium)
-                mkdirp(currentPath + "/assets", function(err) {
-                  if (err) {
-                    console.log(err)
-                    process.exit()
-                  } else {
-                    write.str(currentPath + "/assets", "query.css", "/* OVERRIDE CSS FOR QUERY EXPLORER */")
-                    write.str(currentPath + "/assets", "socket.css", "/* OVERRIDE CSS FOR SOCKET EXPLORER */")
-                    console.log("\n#############################################")
-                    console.log(" ")
-                    console.log(" WELCOME TO PLANARIA.")
-                    console.log(" ")
-                    console.log(" Next Steps:")
-                    console.log("")
-                    console.log(" 1. Default: Try running 'pc start'")
-                    console.log(" 2. Customize: Update planaria.js or planarium.json to customiize the behavior, and then run 'pc start'")
-                    console.log("")
-                    console.log("#############################################\n")
-                  }
-                })
+//                mkdirp(currentPath + "/assets", function(err) {
+//                  if (err) {
+//                    console.log(err)
+//                    process.exit()
+//                  } else {
+//                    write.str(currentPath + "/assets", "query.css", "/* OVERRIDE CSS FOR QUERY EXPLORER */")
+//                    write.str(currentPath + "/assets", "socket.css", "/* OVERRIDE CSS FOR SOCKET EXPLORER */")
+//                    console.log("\n#############################################")
+//                    console.log(" ")
+//                    console.log(" WELCOME TO PLANARIA.")
+//                    console.log(" ")
+//                    console.log(" Next Steps:")
+//                    console.log("")
+//                    console.log(" 1. Default: Try running 'pc start'")
+//                    console.log(" 2. Customize: Update planaria.js or planarium.json to customiize the behavior, and then run 'pc start'")
+//                    console.log("")
+//                    console.log("#############################################\n")
+//                  }
+//                })
               }
             })
           })
