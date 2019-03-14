@@ -7,6 +7,7 @@ services:
       - ${DATA_DIR}:/data/db
       - ./genes:/planaria/genes
       - ${ASSETS_DIR}:/planaria/public/assets
+      - ${FS_DIR}:/fs
       - ./.env:/planaria/child.env
     environment:
 #      - NODE_ADDRESS={{NODE_ADDRESS}}

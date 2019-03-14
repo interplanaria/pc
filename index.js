@@ -61,6 +61,7 @@ const ask = {
       inquirer.prompt([
         { type: 'input', name: 'DATA_DIR', message: "DB Storage Path?", default: (process.env.DATA_DIR ? process.env.DATA_DIR : './db') },
         { type: 'input', name: 'ASSETS_DIR', message: "File Serve Assets Storage Path?", default: (process.env.ASSETS_DIR ? process.env.ASSETS_DIR : './assets') },
+        { type: 'input', name: 'FS_DIR', message: "File System Storage Path?", default: (process.env.FS_DIR ? process.env.FS_DIR : './fs') },
         { type: 'input', name: 'MAX_MEMORY', message: "Max Memory in GB", default: (process.env.MAX_MEMORY ? process.env.MAX_MEMORY : 1) },
         { type: 'input', name: 'BITCOIN_USER', message: "Bitcoin JSON-RPC Username", default: (process.env.BITCOIN_USER ? process.env.BITCOIN_USER : "root") },
         { type: 'input', name: 'BITCOIN_PASSWORD', message: "Bitcoin JSON-RPC Password", default: (process.env.BITCOIN_PASSWORD ? process.env.BITCOIN_PASSWORD : "bitcoin") },
@@ -299,13 +300,22 @@ const start = {
           console.log(err)
           process.exit()
         } else {
-          updateEnv(answers, function() {
-            console.log("start planaria", originalEnv)
-            let aria = spawn("docker-compose", ["-p", "planaria", "-f", "planaria.yml", "up", "-d"], { stdio: 'inherit' })
-            aria.on('exit', function(code) {
-              console.log("Started planaria", code)
-              if (cb) cb()
-            })
+          let fsPath = path.resolve(_path, answers.FS_DIR)
+          console.log("Resolved FS_DIR = ", fsPath)
+          mkdirp(fsPath, function(err2) {
+            if (err2) {
+              console.log(err2)
+              process.exit()
+            } else {
+              updateEnv(answers, function() {
+                console.log("start planaria", originalEnv)
+                let aria = spawn("docker-compose", ["-p", "planaria", "-f", "planaria.yml", "up", "-d"], { stdio: 'inherit' })
+                aria.on('exit', function(code) {
+                  console.log("Started planaria", code)
+                  if (cb) cb()
+                })
+              })
+            }
           })
         }
       })

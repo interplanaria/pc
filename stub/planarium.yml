@@ -6,6 +6,7 @@ services:
     volumes:
       - ./genes:/app/genes
       - ${ASSETS_DIR}:/app/public/assets
+      - ${FS_DIR}:/fs
       - ./.env:/app/child.env
     environment:
 #      - NODE_ADDRESS={{NODE_ADDRESS}}
