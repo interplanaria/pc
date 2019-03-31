@@ -290,7 +290,7 @@ const start = {
       });
       // get addresses
       answers.ADDRESS = dirs.join(',')
-      answers.HOST = ip.address()
+      answers.HOST = (process.env.HOST ? process.env.HOST : ip.address())
       console.log("update to", answers)
 
       let resolvedPath = path.resolve(_path, answers.ASSETS_DIR)
@@ -329,7 +329,7 @@ const start = {
       });
       // get addresses
       answers.ADDRESS = dirs.join(',')
-      answers.HOST = ip.address()
+      answers.HOST = (process.env.HOST ? process.env.HOST : ip.address())
       console.log("update to", answers)
       updateEnv(answers, function() {
         console.log("Starting Planarium...")
