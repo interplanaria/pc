@@ -19,7 +19,7 @@ services:
       - BITCOIN_PASSWORD=${BITCOIN_PASSWORD}
     entrypoint: ["/planaria/entrypoint.sh", "start", "${MAX_MEMORY}", "${ARG1}", "${ARG2}", "${ARG3}"]
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
       - "28337:28337"
       - "28339:28339"
     networks:
