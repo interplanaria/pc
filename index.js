@@ -377,36 +377,7 @@ const start = {
 const init = function() {
   if (process.argv.length >= 3) {
     let cmd = process.argv[2]
-    if (cmd === 'rewind') {
-      /*******************************************
-      *
-      *   Rewind to block height
-      *
-      *   $ pc rewind [height]
-      *
-      *   1. ask DATA_DIR and MAX_MEMORY
-      *   2. update .env
-      *   3. Run
-      *
-      *******************************************/
-      if (process.argv.length >= 4) {
-        // stop first
-        stop.all(function() {
-          console.log("Stopped Planaria + Planarium")
-          // get height
-          let height = parseInt(process.argv[3])
-          let addrs = null
-          if (process.argv.length >= 5) {
-            addrs = process.argv[4]
-          }
-          // rewind
-          rewind(height, addrs, function() {
-            // restart
-            //start.all()
-          })
-        })
-      }
-    } else if (cmd === 'logs') {
+    if (cmd === 'logs') {
       /*******************************************
       *
       *   Log
@@ -891,6 +862,36 @@ program
       // both write + read
       start.all()
     }
+  })
+
+/*******************************************
+*
+*   Rewind to block height
+*
+*   $ pc rewind [height]
+*
+*   1. ask DATA_DIR and MAX_MEMORY
+*   2. update .env
+*   3. Run
+*
+*******************************************/
+program
+  .command('rewind <height> [address]')
+  .action(function(height, address) {
+    // stop first
+    stop.all(function() {
+      console.log("Stopped Planaria + Planarium")
+      // get height
+      let addrs = null
+      if (address) {
+        addrs = address
+      }
+      // rewind
+      rewind(height, addrs, function() {
+        // restart
+        //start.all()
+      })
+    })
   })
 
 program.parse(process.argv)
