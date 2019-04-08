@@ -42,7 +42,7 @@ const ask = {
   init: function(cb) {
     inquirer.prompt([
       { type: 'input', name: 'NAME', message: "Project Name", default: process.cwd().split('/').pop() },
-      { type: 'input', name: 'DESCRIPTION', message: "Project Description", default: "" }, 
+      { type: 'input', name: 'DESCRIPTION', message: "Project Description", default: "" },
       { type: 'input', name: 'VERSION', message: "Version", default: "0.0.1" }
     ]).then(function(answers) {
       cb(answers)
@@ -179,7 +179,7 @@ const stop = {
       cs.forEach(function(info) {
         docker.getContainer(info.id).stop(function() {
           counter++
-          console.log("Stopped", info.image, info.id) 
+          console.log("Stopped", info.image, info.id)
           if (counter >= cs.length) {
             if (cb) cb()
           }
@@ -353,7 +353,7 @@ const start = {
         let currentPath = process.cwd()
         write.lines(currentPath, ".env", [
           "NODE_KEY="+key.privateKey,
-          "NODE_ADDRESS="+key.address 
+          "NODE_ADDRESS="+key.address
         ])
         answers.NODE_ADDRESS = key.address
       } else {
@@ -534,7 +534,7 @@ const init = function() {
         /*******************************************
         *
         *   $ pc pull 1GL79Nr6YcLvmogsvqUkL37mB6pgZhQrVu
-        *   
+        *
         *   * pull the following code from planaria.network:
         *     - planaria.js
         *     - package.json
@@ -852,8 +852,8 @@ const init = function() {
       *
       *   $ pc ls
       *
-      *   Display in tabular format: 
-      *   
+      *   Display in tabular format:
+      *
       *   Name | Address | Description
       *
       *******************************************/
