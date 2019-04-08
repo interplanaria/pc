@@ -298,14 +298,14 @@ const start = {
       mkdirp(resolvedPath, function(err) {
         if (err) {
           console.log(err)
-          process.exit()
+          process.exit(1)
         } else {
           let fsPath = path.resolve(_path, answers.FS_DIR)
           console.log("Resolved FS_DIR = ", fsPath)
           mkdirp(fsPath, function(err2) {
             if (err2) {
               console.log(err2)
-              process.exit()
+              process.exit(1)
             } else {
               updateEnv(answers, function() {
                 console.log("start planaria", originalEnv)
@@ -369,6 +369,7 @@ const start = {
       })
     } catch (e) {
       console.log(e, "the 'start' command must be run in the root folder")
+      process.exit(1)
     }
   }
 }
