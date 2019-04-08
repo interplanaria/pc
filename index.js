@@ -377,78 +377,7 @@ const start = {
 const init = function() {
   if (process.argv.length >= 3) {
     let cmd = process.argv[2]
-    if (cmd === 'push') {
-      /*******************************************
-      *
-      *   $ pc push
-      *
-      *   1. Read the files:
-      *     - README.md
-      *     - planaria.js
-      *     - package.json
-      *   2. Check the key from .env
-      *   3. Sign the version number and attach to the form
-      *   4. Attach file contents to the form
-      *   5. Attach text fields
-      *   6. Submit
-      *
-      *******************************************/
-      if (!fs.existsSync(process.cwd() + "/planaria.js")) {
-        console.log("Cannot push from a non-gene folder. Please try again inside a gene folder")
-        return
-      }
-      if (!fs.existsSync(process.cwd() + "/planarium.js")) {
-        console.log("Cannot push from a non-gene folder. Please try again inside a gene folder")
-        return
-      }
-      let plan = require(process.cwd() + "/planaria.js")
-      if (plan.version && semver.valid(plan.version)) {
-        var form = new FormData();
-        // 1. Read the files
-        let content = {
-          planaria: fs.createReadStream(process.cwd() + '/planaria.js'),
-          planarium: fs.createReadStream(process.cwd() + '/planarium.js'),
-          readme: fs.createReadStream(process.cwd() + '/README.md'),
-          package: fs.createReadStream(process.cwd() + '/package.json')
-        }
-        // 2. Check the key from .env
-        if (process.env.KEY) {
-          // 3. Sign version number and append the signature
-          let privateKey = new bsv.PrivateKey(process.env.KEY)
-          let message = new Message(plan.version)
-          let sig = message.sign(privateKey);
-          form.append('signature', sig)
-          // 4. Append file contents
-          for(let key in content) {
-            form.append(key, content[key])
-          }
-          // 5. Append text fields
-          if (plan.name) form.append('name', plan.name)
-          if (plan.description) form.append('description', plan.description)
-          if (plan.address) form.append('address', plan.address)
-          if (plan.version) form.append('version', plan.version)
-          if (plan.index) form.append('index', JSON.stringify(plan.index))
-          // 6. Submit
-          let r = ""
-          console.log("Submitting...")
-          form.submit(HOST + "/publish", function(err, res) {
-            res.on('data', function(data) {
-              r += data;
-            })
-            .on('end', function() {
-              console.log("Response = ", r)
-            })
-            res.resume();
-          });
-        } else {
-          console.log("Keypair doesn't exist.")
-          process.exit()
-        }
-      } else {
-        console.log("Error: invalid semantic version")
-        process.exit()
-      }
-    } else if (cmd === 'start') {
+    if (cmd === 'start') {
       /*******************************************
       *
       *   REMOTE Start
@@ -883,6 +812,81 @@ program
       console.log(e)
       process.exit(1)
     })
+  })
+
+/*******************************************
+*
+*   $ pc push
+*
+*   1. Read the files:
+*     - README.md
+*     - planaria.js
+*     - package.json
+*   2. Check the key from .env
+*   3. Sign the version number and attach to the form
+*   4. Attach file contents to the form
+*   5. Attach text fields
+*   6. Submit
+*
+*******************************************/
+program
+  .command('push')
+  .action(function() {
+    if (!fs.existsSync(process.cwd() + "/planaria.js")) {
+      console.log("Cannot push from a non-gene folder. Please try again inside a gene folder")
+      process.exit(1)
+    }
+    if (!fs.existsSync(process.cwd() + "/planarium.js")) {
+      console.log("Cannot push from a non-gene folder. Please try again inside a gene folder")
+      process.exit(1)
+    }
+    let plan = require(process.cwd() + "/planaria.js")
+    if (plan.version && semver.valid(plan.version)) {
+      var form = new FormData();
+      // 1. Read the files
+      let content = {
+        planaria: fs.createReadStream(process.cwd() + '/planaria.js'),
+        planarium: fs.createReadStream(process.cwd() + '/planarium.js'),
+        readme: fs.createReadStream(process.cwd() + '/README.md'),
+        package: fs.createReadStream(process.cwd() + '/package.json')
+      }
+      // 2. Check the key from .env
+      if (process.env.KEY) {
+        // 3. Sign version number and append the signature
+        let privateKey = new bsv.PrivateKey(process.env.KEY)
+        let message = new Message(plan.version)
+        let sig = message.sign(privateKey)
+        form.append('signature', sig)
+        // 4. Append file contents
+        for(let key in content) {
+          form.append(key, content[key])
+        }
+        // 5. Append text fields
+        if (plan.name) form.append('name', plan.name)
+        if (plan.description) form.append('description', plan.description)
+        if (plan.address) form.append('address', plan.address)
+        if (plan.version) form.append('version', plan.version)
+        if (plan.index) form.append('index', JSON.stringify(plan.index))
+        // 6. Submit
+        let r = ""
+        console.log("Submitting...")
+        form.submit(HOST + "/publish", function(err, res) {
+          res.on('data', function(data) {
+            r += data
+          })
+          .on('end', function() {
+            console.log("Response = ", r)
+          })
+          res.resume()
+        });
+      } else {
+        console.log("Keypair doesn't exist.")
+        process.exit(1)
+      }
+    } else {
+      console.log("Error: invalid semantic version")
+      process.exit(1)
+    }
   })
 
 program.parse(process.argv)
