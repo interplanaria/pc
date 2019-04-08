@@ -377,48 +377,7 @@ const start = {
 const init = function() {
   if (process.argv.length >= 3) {
     let cmd = process.argv[2]
-    if (cmd === 'restart') {
-      // same as "start"
-      if (process.argv.length >= 4) {
-        let action = process.argv[3]
-        if (action === 'write') {
-          // write => planaria
-          console.log("stopping planaria...")
-          stop.planaria(function() {
-            console.log("stopped. restarting planaria...")
-            let aria = spawn("docker-compose", ["-p", "planaria", "-f", "planaria.yml", "up", "-d"], { stdio: 'inherit' })
-            aria.on('exit', function(code) {
-              console.log("Started planaria", code)
-            })
-          })
-        } else if (action === 'read') {
-          // write => planarium
-          console.log("stopping planarium...")
-          stop.planarium(function() {
-            console.log("stopped. restarting planarium...")
-            let arium = spawn("docker-compose", ["-p", "planarium", "-f", "planarium.yml", "up", "-d"], { stdio: 'inherit' })
-            arium.on('exit', function(code) {
-              console.log("Started planarium", code)
-            })
-          })
-        }
-      } else {
-        // both write + read
-        console.log("stopping planaria + planarium...")
-        stop.all(function() {
-          console.log("stopped. restarting...")
-          let aria = spawn("docker-compose", ["-p", "planaria", "-f", "planaria.yml", "up", "-d"], { stdio: 'inherit' })
-          aria.on('exit', function(code) {
-            console.log("Started planaria", code)
-            console.log("Starting planarium...")
-            let arium = spawn("docker-compose", ["-p", "planarium", "-f", "planarium.yml", "up", "-d"], { stdio: 'inherit' })
-            arium.on('exit', function(code) {
-              console.log("Started planarium", code)
-            })
-          })
-        })
-      }
-    } else if (cmd === 'stop') {
+    if (cmd === 'stop') {
       if (process.argv.length >= 4) {
         let action = process.argv[3]
         if (action === 'write') {
@@ -886,6 +845,48 @@ program
     } else {
       // both write + read
       update.all()
+    }
+  })
+
+program
+  .command('restart [action]')
+  .action(function(action) {
+    // same as "start"
+    if (action === 'write') {
+      // write => planaria
+      console.log("stopping planaria...")
+      stop.planaria(function() {
+        console.log("stopped. restarting planaria...")
+        let aria = spawn("docker-compose", ["-p", "planaria", "-f", "planaria.yml", "up", "-d"], { stdio: 'inherit' })
+        aria.on('exit', function(code) {
+          console.log("Started planaria", code)
+        })
+      })
+    } else if (action === 'read') {
+      // write => planarium
+      console.log("stopping planarium...")
+      stop.planarium(function() {
+        console.log("stopped. restarting planarium...")
+        let arium = spawn("docker-compose", ["-p", "planarium", "-f", "planarium.yml", "up", "-d"], { stdio: 'inherit' })
+        arium.on('exit', function(code) {
+          console.log("Started planarium", code)
+        })
+      })
+    } else {
+      // both write + read
+      console.log("stopping planaria + planarium...")
+      stop.all(function() {
+        console.log("stopped. restarting...")
+        let aria = spawn("docker-compose", ["-p", "planaria", "-f", "planaria.yml", "up", "-d"], { stdio: 'inherit' })
+        aria.on('exit', function(code) {
+          console.log("Started planaria", code)
+          console.log("Starting planarium...")
+          let arium = spawn("docker-compose", ["-p", "planarium", "-f", "planarium.yml", "up", "-d"], { stdio: 'inherit' })
+          arium.on('exit', function(code) {
+            console.log("Started planarium", code)
+          })
+        })
+      })
     }
   })
 
