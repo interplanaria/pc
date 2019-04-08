@@ -377,133 +377,7 @@ const start = {
 const init = function() {
   if (process.argv.length >= 3) {
     let cmd = process.argv[2]
-    if (cmd === 'new') {
-      if (process.argv.length >= 4) {
-        let arg = process.argv[3]
-
-        if (arg === 'machine' || arg === 'genesis') {
-          /*******************************************
-          *
-          *   $ pc new [machine|genesis]
-          *
-          *   1. Questionnaire: NAME, DESCRiPTION, VERSION
-          *   2. Create keypair
-          *   3. Create a folder with the address
-          *   4. Create [folder]/planaria.js + ./planarium.json
-          *   5. Create [folder]/package.json
-          *   6. Create [folder]/README.md
-          *   7. Create [folder]/.env and write keys
-          *   8. Create [folder]/planaria.yml + ./planarium.yml and write ADDRESS (the generated bitcoin address)
-          *
-          *******************************************/
-          let stubname;
-          if (arg === 'genesis') {
-            stubname = {
-              aria: "/stub/genesia.js",
-              arium: "/stub/genesium.js"
-            }
-          } else {
-            stubname = {
-              aria: "/stub/planaria.js",
-              arium: "/stub/planarium.js"
-            }
-          }
-
-          // 1. Questionnaire
-          ask.init(function(answers) {
-            // 2. create keypair
-            let key = createKey()
-            answers.ADDRESS = key.address
-            // 3. create a folder with the address
-            let currentPath = process.cwd()
-            let childPath = currentPath + "/genes/" + key.address
-            mkdirp(childPath, function(err) {
-              if (err) {
-                console.log(err)
-                process.exit()
-              } else {
-                // 4. Create planaria.js from stub and the questionnaire
-                let plan = {
-                  aria: fs.readFileSync(__dirname + stubname.aria, 'utf8'),
-                  arium: fs.readFileSync(__dirname + stubname.arium, 'utf8'),
-                }
-                Object.keys(answers).forEach(function(key) {
-                  plan.aria = plan.aria.replace(key, "'" + answers[key] + "'")
-                  plan.arium = plan.arium.replace(key, "'" + answers[key] + "'")
-                })
-                write.str(childPath, "planaria.js", plan.aria)
-                write.str(childPath, "planarium.js", plan.arium)
-                // 5. Create package.json from stub
-                write.str(childPath, "package.json", fs.readFileSync(__dirname + '/stub/package.json', 'utf8'))
-                // 5. Create README.md from stub
-                write.str(childPath, "README.md", fs.readFileSync(__dirname + '/stub/README.md', 'utf8'))
-                // 6. Create .env and write keys
-                write.lines(childPath, ".env", [
-                  "KEY="+key.privateKey,
-                  "ADDRESS="+key.address
-                ])
-                let compose = {
-                  planaria: fs.readFileSync(__dirname + '/stub/planaria.yml', 'utf8'),
-                  planarium: fs.readFileSync(__dirname + '/stub/planarium.yml', 'utf8'),
-                }
-                write.str(currentPath, "planaria.yml", compose.planaria)
-                write.str(currentPath, "planarium.yml", compose.planarium)
-//                mkdirp(currentPath + "/assets", function(err) {
-//                  if (err) {
-//                    console.log(err)
-//                    process.exit()
-//                  } else {
-//                    write.str(currentPath + "/assets", "query.css", "/* OVERRIDE CSS FOR QUERY EXPLORER */")
-//                    write.str(currentPath + "/assets", "socket.css", "/* OVERRIDE CSS FOR SOCKET EXPLORER */")
-//                    console.log("\n#############################################")
-//                    console.log(" ")
-//                    console.log(" WELCOME TO PLANARIA.")
-//                    console.log(" ")
-//                    console.log(" Next Steps:")
-//                    console.log("")
-//                    console.log(" 1. Default: Try running 'pc start'")
-//                    console.log(" 2. Customize: Update planaria.js or planarium.json to customiize the behavior, and then run 'pc start'")
-//                    console.log("")
-//                    console.log("#############################################\n")
-//                  }
-//                })
-              }
-            })
-          })
-        } else if (arg === 'user') {
-          // 1. generate a keypair
-          let keyPair = createKey()
-          ask.login(function(answers) {
-            let file = answers.filename + "/" + keyPair.address
-            // 2. store keys in ~/.planaria/[address]
-            if (!fs.existsSync(file)) {
-              mkdirp(answers.filename, function(err) {
-                if (err) {
-                  console.log(err)
-                  process.exit()
-                } else {
-                  write._lines(file, [
-                    "PRIVATE_KEY="+keyPair.privateKey,
-                    "PUBLIC_KEY="+keyPair.publicKey
-                  ])
-                  console.log("################################################################################################")
-                  console.log("#")
-                  console.log("#", "Welcome to Planaria. Your new ID is:")
-                  console.log("#")
-                  console.log("#", keyPair.address)
-                  console.log("#")
-                  console.log("#", "1. A Planaria ID is a Bitcoin Address.")
-                  console.log("#", "1. Use your Planaria ID as a request header when making HTTP requests to a Planaria node")
-                  console.log("#", "2. The privateKey & publicKey for your ID is stored at: " + file)
-                  console.log("#")
-                  console.log("################################################################################################")
-                }
-              })
-            }
-          })
-        }
-      }
-    } else if (cmd === 'pull') {
+    if (cmd === 'pull') {
       if (process.argv.length >= 4) {
         /*******************************************
         *
@@ -892,6 +766,117 @@ program
     console.log("│")
     let tree = treeify.asTree(t, true)
     console.log(tree)
+  })
+
+/*******************************************
+*
+*   $ pc new [user|machine|genesis]
+*
+*   1. Questionnaire: NAME, DESCRiPTION, VERSION
+*   2. Create keypair
+*   3. Create a folder with the address
+*   4. Create [folder]/planaria.js + ./planarium.json
+*   5. Create [folder]/package.json
+*   6. Create [folder]/README.md
+*   7. Create [folder]/.env and write keys
+*   8. Create [folder]/planaria.yml + ./planarium.yml and write ADDRESS (the generated bitcoin address)
+*
+*******************************************/
+program
+  .command('new <argument>')
+  .action(function(obj) {
+    if (!['user', 'machine', 'genesis'].includes(obj)) {
+      console.log('Argument must be one of: user, machine, genesis')
+      process.exit(1)
+    }
+    if (obj === 'machine' || obj === 'genesis') {
+      let stubname;
+      if (obj === 'genesis') {
+        stubname = {
+          aria: "/stub/genesia.js",
+          arium: "/stub/genesium.js"
+        }
+      } else {
+        stubname = {
+          aria: "/stub/planaria.js",
+          arium: "/stub/planarium.js"
+        }
+      }
+
+      // 1. Questionnaire
+      ask.init(function(answers) {
+        // 2. create keypair
+        let key = createKey()
+        answers.ADDRESS = key.address
+        // 3. create a folder with the address
+        let currentPath = process.cwd()
+        let childPath = currentPath + "/genes/" + key.address
+        mkdirp(childPath, function(err) {
+          if (err) {
+            console.log(err)
+            process.exit()
+          } else {
+            // 4. Create planaria.js from stub and the questionnaire
+            let plan = {
+              aria: fs.readFileSync(__dirname + stubname.aria, 'utf8'),
+              arium: fs.readFileSync(__dirname + stubname.arium, 'utf8'),
+            }
+            Object.keys(answers).forEach(function(key) {
+              plan.aria = plan.aria.replace(key, "'" + answers[key] + "'")
+              plan.arium = plan.arium.replace(key, "'" + answers[key] + "'")
+            })
+            write.str(childPath, "planaria.js", plan.aria)
+            write.str(childPath, "planarium.js", plan.arium)
+            // 5. Create package.json from stub
+            write.str(childPath, "package.json", fs.readFileSync(__dirname + '/stub/package.json', 'utf8'))
+            // 5. Create README.md from stub
+            write.str(childPath, "README.md", fs.readFileSync(__dirname + '/stub/README.md', 'utf8'))
+            // 6. Create .env and write keys
+            write.lines(childPath, ".env", [
+              "KEY="+key.privateKey,
+              "ADDRESS="+key.address
+            ])
+            let compose = {
+              planaria: fs.readFileSync(__dirname + '/stub/planaria.yml', 'utf8'),
+              planarium: fs.readFileSync(__dirname + '/stub/planarium.yml', 'utf8'),
+            }
+            write.str(currentPath, "planaria.yml", compose.planaria)
+            write.str(currentPath, "planarium.yml", compose.planarium)
+          }
+        })
+      })
+    } else if (obj === 'user') {
+      // 1. generate a keypair
+      let keyPair = createKey()
+      ask.login(function(answers) {
+        let file = answers.filename + "/" + keyPair.address
+        // 2. store keys in ~/.planaria/[address]
+        if (!fs.existsSync(file)) {
+          mkdirp(answers.filename, function(err) {
+            if (err) {
+              console.log(err)
+              process.exit(1)
+            } else {
+              write._lines(file, [
+                "PRIVATE_KEY="+keyPair.privateKey,
+                "PUBLIC_KEY="+keyPair.publicKey
+              ])
+              console.log("################################################################################################")
+              console.log("#")
+              console.log("#", "Welcome to Planaria. Your new ID is:")
+              console.log("#")
+              console.log("#", keyPair.address)
+              console.log("#")
+              console.log("#", "1. A Planaria ID is a Bitcoin Address.")
+              console.log("#", "1. Use your Planaria ID as a request header when making HTTP requests to a Planaria node")
+              console.log("#", "2. The privateKey & publicKey for your ID is stored at: " + file)
+              console.log("#")
+              console.log("################################################################################################")
+            }
+          })
+        }
+      })
+    }
   })
 
 program.parse(process.argv)
