@@ -377,45 +377,7 @@ const start = {
 const init = function() {
   if (process.argv.length >= 3) {
     let cmd = process.argv[2]
-    if (cmd === 'update') {
-      /*******************************************
-      *
-      *   UpdatePlanaria + Planarium Docker Images
-      *
-      *   Uppdate both planaria and planarium images to ':latest' tags
-      *   $ pc update
-      *
-      *   Update only the planarium image (read) to ':latest' tags
-      *   $ pc update read
-      *
-      *   Update only the planaria image (write) to ':latest' tags
-      *   $ pc update write
-      *
-      *   Update only the planarium image (read) to [version]
-      *   $ pc update read [version]
-      *
-      *   Update only the planaria image (write) to [version]
-      *   $ pc update write [version]
-      *
-      *******************************************/
-      if (process.argv.length >= 4) {
-        let action = process.argv[3]
-        let version = null
-        if (process.argv.length >= 5) {
-          version = process.argv[4]
-        }
-        if (action === 'write') {
-          // write => planaria
-          update.planaria(version)
-        } else if (action === 'read') {
-          // read => planarium
-          update.planarium(version)
-        }
-      } else {
-        // both write + read
-        update.all()
-      }
-    } else if (cmd === 'restart') {
+    if (cmd === 'restart') {
       // same as "start"
       if (process.argv.length >= 4) {
         let action = process.argv[3]
@@ -889,6 +851,41 @@ program
     } else if (action === 'read') {
       // read => planarium
       logs.planarium(size)
+    }
+  })
+
+/*******************************************
+*
+*   UpdatePlanaria + Planarium Docker Images
+*
+*   Uppdate both planaria and planarium images to ':latest' tags
+*   $ pc update
+*
+*   Update only the planarium image (read) to ':latest' tags
+*   $ pc update read
+*
+*   Update only the planaria image (write) to ':latest' tags
+*   $ pc update write
+*
+*   Update only the planarium image (read) to [version]
+*   $ pc update read [version]
+*
+*   Update only the planaria image (write) to [version]
+*   $ pc update write [version]
+*
+*******************************************/
+program
+  .command('update <action> [version]')
+  .action(function(action, version) {
+    if (action === 'write') {
+      // write => planaria
+      update.planaria(version)
+    } else if (action === 'read') {
+      // read => planarium
+      update.planarium(version)
+    } else {
+      // both write + read
+      update.all()
     }
   })
 
