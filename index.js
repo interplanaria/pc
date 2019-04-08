@@ -377,33 +377,7 @@ const start = {
 const init = function() {
   if (process.argv.length >= 3) {
     let cmd = process.argv[2]
-    if (cmd === 'logs') {
-      /*******************************************
-      *
-      *   Log
-      *
-      *   $ pc logs read
-      *   $ pc logs write
-      *   $ pc logs read 100
-      *   $ pc logs write 100
-      *
-      *******************************************/
-      if (process.argv.length >= 4) {
-        let action = process.argv[3]
-        let size = 1000
-        if (process.argv.length >= 5) {
-          size = parseInt(process.argv[4])
-        }
-        console.log("Logging starting from last", size)
-        if (action === 'write') {
-          // write => planaria
-          logs.planaria(size)
-        } else if (action === 'read') {
-          // read => planarium
-          logs.planarium(size)
-        }
-      }
-    } else if (cmd === 'update') {
+    if (cmd === 'update') {
       /*******************************************
       *
       *   UpdatePlanaria + Planarium Docker Images
@@ -892,6 +866,30 @@ program
         //start.all()
       })
     })
+  })
+
+/*******************************************
+*
+*   Log
+*
+*   $ pc logs read
+*   $ pc logs write
+*   $ pc logs read 100
+*   $ pc logs write 100
+*
+*******************************************/
+program
+  .command('logs <action> [limit]')
+  .action(function(action, limit) {
+    let size = parseInt(limit || 1000)
+    console.log("Logging starting from last", size)
+    if (action === 'write') {
+      // write => planaria
+      logs.planaria(size)
+    } else if (action === 'read') {
+      // read => planarium
+      logs.planarium(size)
+    }
   })
 
 program.parse(process.argv)
