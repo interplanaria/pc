@@ -377,26 +377,7 @@ const start = {
 const init = function() {
   if (process.argv.length >= 3) {
     let cmd = process.argv[2]
-    if (cmd === 'join') {
-      if (process.env.NODE_KEY) {
-        // 3. Sign version number and append the signature
-        let privateKey = new bsv.PrivateKey(process.env.NODE_KEY)
-        let timestamp = Date.now().toString()
-        let message = new Message(timestamp)
-        let sig = message.sign(privateKey);
-        console.log("Joining..")
-        axios.post("http://localhost:3000/join", {
-          timestamp: timestamp,
-          signature: sig
-        }).then(function(response) {
-          console.log(response)
-        }).catch(function(e) {
-          console.log(e)
-        })
-      } else {
-        console.log("The root folder must contain an .env file with NODE_ADDRESS and NODE_KEY")
-      }
-    } else if (cmd === 'push') {
+    if (cmd === 'push') {
       /*******************************************
       *
       *   $ pc push
@@ -874,6 +855,30 @@ program
       if (!fs.existsSync(currentPath + "/planarium.yml")) {
         write.str(currentPath, "planarium.yml", compose.planarium)
       }
+    }).catch(function(e) {
+      console.log(e)
+      process.exit(1)
+    })
+  })
+
+program
+  .command('join')
+  .action(function() {
+    if (!process.env.NODE_KEY) {
+      console.log("The root folder must contain an .env file with NODE_ADDRESS and NODE_KEY")
+      process.exit(1)
+    }
+    // Sign version number and append the signature
+    let privateKey = new bsv.PrivateKey(process.env.NODE_KEY)
+    let timestamp = Date.now().toString()
+    let message = new Message(timestamp)
+    let sig = message.sign(privateKey)
+    console.log("Joining..")
+    axios.post("http://localhost:3000/join", {
+      timestamp: timestamp,
+      signature: sig
+    }).then(function(response) {
+      console.log(response)
     }).catch(function(e) {
       console.log(e)
       process.exit(1)
