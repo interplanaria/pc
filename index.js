@@ -377,32 +377,7 @@ const start = {
 const init = function() {
   if (process.argv.length >= 3) {
     let cmd = process.argv[2]
-    if (cmd === 'start') {
-      /*******************************************
-      *
-      *   REMOTE Start
-      *
-      *   $ pc start
-      *
-      *   1. ask DATA_DIR and MAX_MEMORY
-      *   2. update .env
-      *   3. Run
-      *
-      *******************************************/
-      if (process.argv.length >= 4) {
-        let action = process.argv[3]
-        if (action === 'write') {
-          // write => planaria
-          start.planaria()
-        } else if (action === 'read') {
-          // read => planarium
-          start.planarium()
-        }
-      } else {
-        // both write + read
-        start.all()
-      }
-    } else if (cmd === 'rewind') {
+    if (cmd === 'rewind') {
       /*******************************************
       *
       *   Rewind to block height
@@ -886,6 +861,35 @@ program
     } else {
       console.log("Error: invalid semantic version")
       process.exit(1)
+    }
+  })
+
+/*******************************************
+*
+*   REMOTE Start
+*
+*   $ pc start
+*
+*   1. ask DATA_DIR and MAX_MEMORY
+*   2. update .env
+*   3. Run
+*
+*******************************************/
+program
+  .command('start [action]')
+  .action(function(action) {
+    if (action === 'write') {
+      console.log("Starting write...")
+      // write => planaria
+      start.planaria()
+    } else if (action === 'read') {
+      console.log("Starting read...")
+      // read => planarium
+      start.planarium()
+    } else {
+      console.log("Starting read and write...")
+      // both write + read
+      start.all()
     }
   })
 
