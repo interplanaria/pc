@@ -377,57 +377,7 @@ const start = {
 const init = function() {
   if (process.argv.length >= 3) {
     let cmd = process.argv[2]
-    if (cmd === 'pull') {
-      if (process.argv.length >= 4) {
-        /*******************************************
-        *
-        *   $ pc pull 1GL79Nr6YcLvmogsvqUkL37mB6pgZhQrVu
-        *
-        *   * pull the following code from planaria.network:
-        *     - planaria.js
-        *     - package.json
-        *     - README.md
-        *   * generate docker compose files
-        *
-        *******************************************/
-
-        let address = process.argv[3]
-        let currentPath = process.cwd()
-        let childPath = currentPath + "/genes/" + address
-        console.log("Installing from address:", address)
-        axios.get(HOST + "/install/" + address).then(function(response) {
-          let item = response.data.item
-          mkdirp(childPath, function(err) {
-            if (err) {
-              console.log(err)
-              process.exit()
-            } else {
-              if (item.planaria) write.str(childPath, "planaria.js", item.planaria)
-              if (item.planarium) write.str(childPath, "planarium.js", item.planarium)
-              if (item.package) write.str(childPath, "package.json", item.package)
-              if (item.readme) write.str(childPath, "README.md", item.readme)
-            }
-          })
-          let compose = {
-            planaria: fs.readFileSync(__dirname + '/stub/planaria.yml', 'utf8'),
-            planarium: fs.readFileSync(__dirname + '/stub/planarium.yml', 'utf8'),
-          }
-          // only write if there are no yml files
-          if (!fs.existsSync(currentPath + "/planaria.yml")) {
-            write.str(currentPath, "planaria.yml", compose.planaria)
-          }
-          if (!fs.existsSync(currentPath + "/planarium.yml")) {
-            write.str(currentPath, "planarium.yml", compose.planarium)
-          }
-        }).catch(function(e) {
-          console.log(e)
-          process.exit()
-        })
-      } else {
-        console.log("Syntax: 'pc pull [ADDRESS]'")
-        process.exit()
-      }
-    } else if (cmd === 'join') {
+    if (cmd === 'join') {
       if (process.env.NODE_KEY) {
         // 3. Sign version number and append the signature
         let privateKey = new bsv.PrivateKey(process.env.NODE_KEY)
@@ -877,6 +827,57 @@ program
         }
       })
     }
+  })
+
+/*******************************************
+*
+*   $ pc pull 1GL79Nr6YcLvmogsvqUkL37mB6pgZhQrVu
+*
+*   * pull the following code from planaria.network:
+*     - planaria.js
+*     - package.json
+*     - README.md
+*   * generate docker compose files
+*
+*******************************************/
+program
+  .command('pull [address]')
+  .action(function(address) {
+    if (!address) {
+      console.log("Missing required argument: 'pc pull [ADDRESS]'")
+      process.exit(1)
+    }
+    let currentPath = process.cwd()
+    let childPath = currentPath + "/genes/" + address
+    console.log("Installing from address:", address)
+    axios.get(HOST + "/install/" + address).then(function(response) {
+      let item = response.data.item
+      mkdirp(childPath, function(err) {
+        if (err) {
+          console.log(err)
+          process.exit(1)
+        } else {
+          if (item.planaria) write.str(childPath, "planaria.js", item.planaria)
+          if (item.planarium) write.str(childPath, "planarium.js", item.planarium)
+          if (item.package) write.str(childPath, "package.json", item.package)
+          if (item.readme) write.str(childPath, "README.md", item.readme)
+        }
+      })
+      let compose = {
+        planaria: fs.readFileSync(__dirname + '/stub/planaria.yml', 'utf8'),
+        planarium: fs.readFileSync(__dirname + '/stub/planarium.yml', 'utf8'),
+      }
+      // only write if there are no yml files
+      if (!fs.existsSync(currentPath + "/planaria.yml")) {
+        write.str(currentPath, "planaria.yml", compose.planaria)
+      }
+      if (!fs.existsSync(currentPath + "/planarium.yml")) {
+        write.str(currentPath, "planarium.yml", compose.planarium)
+      }
+    }).catch(function(e) {
+      console.log(e)
+      process.exit(1)
+    })
   })
 
 program.parse(process.argv)
