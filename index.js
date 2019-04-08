@@ -377,24 +377,7 @@ const start = {
 const init = function() {
   if (process.argv.length >= 3) {
     let cmd = process.argv[2]
-    if (cmd === 'stop') {
-      if (process.argv.length >= 4) {
-        let action = process.argv[3]
-        if (action === 'write') {
-          stop.planaria(function() {
-            console.log("Stopped Planaria")
-          })
-        } else if (action === 'read') {
-          stop.planarium(function() {
-            console.log("Stopped Planarium")
-          })
-        }
-      } else {
-        stop.all(function() {
-          console.log("Stopped Planaria + Planarium")
-        })
-      }
-    } else if (cmd === 'ls') {
+    if (cmd === 'ls') {
       /*******************************************
       *
       *   List all Planaria info under current folder
@@ -886,6 +869,24 @@ program
             console.log("Started planarium", code)
           })
         })
+      })
+    }
+  })
+
+program
+  .command('stop [action]')
+  .action(function() {
+    if (action === 'write') {
+      stop.planaria(function() {
+        console.log("Stopped Planaria")
+      })
+    } else if (action === 'read') {
+      stop.planarium(function() {
+        console.log("Stopped Planarium")
+      })
+    } else {
+      stop.all(function() {
+        console.log("Stopped Planaria + Planarium")
       })
     }
   })
