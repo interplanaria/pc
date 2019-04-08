@@ -12,6 +12,7 @@
     "bsv": "^0.20.3",
     "bsv-message": "^1.0.3",
     "cli-table": "^0.3.1",
+    "commander": "^2.19.0",
     "dockerode": "^2.5.7",
     "dotenv": "^6.2.0",
     "form-data": "^2.3.3",

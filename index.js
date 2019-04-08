@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 var en = require('dotenv').config()
 var originalEnv = en.parsed
+const program = require('commander')
 const YAML = require('yaml')
 const bsv = require('bsv')
 const Stream = require('stream')
@@ -376,35 +377,7 @@ const start = {
 const init = function() {
   if (process.argv.length >= 3) {
     let cmd = process.argv[2]
-    if (cmd === 'ls') {
-      if (process.argv.length >= 4) {
-        let arg = process.argv[3]
-        if (arg === 'user') {
-          let t = {}
-          let dirs = fs.readdirSync(homedir + "/.planaria/users").forEach(function (file) {
-            let content = fs.readFileSync(homedir + "/.planaria/users/" + file, 'utf8')
-            let publickey = content.split("\n").filter(function(line) {
-              return line
-            }).map(function(line) {
-              let items = line.split('=')
-              return {
-                key: items[0], val: items[1]
-              }
-            }).filter(function(item) {
-              return item.key === 'PUBLIC_KEY'
-            })
-            t[file] = {
-              path: homedir + "/.planaria/users/" + file,
-              public_key: publickey[0].val
-            }
-          });
-          console.log("\nPLANARIA")
-          console.log("│")
-          let tree = treeify.asTree(t, true)
-          console.log(tree)
-        }
-      }
-    } else if (cmd === 'new') {
+    if (cmd === 'new') {
       if (process.argv.length >= 4) {
         let arg = process.argv[3]
 
@@ -893,4 +866,38 @@ const init = function() {
     }
   }
 }
+
+program
+  .command('ls')
+  .action(function() {
+    let t = {}
+    let dirs = fs.readdirSync(homedir + "/.planaria/users").forEach(function (file) {
+      let content = fs.readFileSync(homedir + "/.planaria/users/" + file, 'utf8')
+      let publickey = content.split("\n").filter(function(line) {
+        return line
+      }).map(function(line) {
+        let items = line.split('=')
+        return {
+          key: items[0], val: items[1]
+        }
+      }).filter(function(item) {
+        return item.key === 'PUBLIC_KEY'
+      })
+      t[file] = {
+        path: homedir + "/.planaria/users/" + file,
+        public_key: publickey[0].val
+      }
+    });
+    console.log("\nPLANARIA")
+    console.log("│")
+    let tree = treeify.asTree(t, true)
+    console.log(tree)
+  })
+
+program.parse(process.argv)
+
+if (!process.argv.slice(2).length) {
+  program.outputHelp()
+}
+
 init()
