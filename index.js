@@ -374,56 +374,6 @@ const start = {
     }
   }
 }
-const init = function() {
-  if (process.argv.length >= 3) {
-    let cmd = process.argv[2]
-    if (cmd === 'ls') {
-      /*******************************************
-      *
-      *   List all Planaria info under current folder
-      *
-      *   $ pc ls
-      *
-      *   Display in tabular format:
-      *
-      *   Name | Address | Description
-      *
-      *******************************************/
-
-      // 1. Find all planaria.js from all child folders
-      let p = process.cwd()
-      let dirs = fs.readdirSync(p).filter(function (file) {
-        return fs.statSync(p+'/'+file).isDirectory();
-      });
-
-      // 2. Parse and display
-      const ps = new Table({
-        head: ['path', 'name', 'description', 'version'],
-        chars: {
-          'top': '' , 'top-mid': '' , 'top-left': '' , 'top-right': ''
-         , 'bottom': '' , 'bottom-mid': '' , 'bottom-left': '' , 'bottom-right': ''
-         , 'left': '' , 'left-mid': '' , 'mid': '' , 'mid-mid': ''
-         , 'right': '' , 'right-mid': '' , 'middle': ' '
-        },
-        style: { head: ['yellow'], 'padding-left': 0 }
-      });
-      dirs.forEach(function(pth) {
-        fs.readdirSync(pth).forEach(function(file) {
-          if (file === 'planaria.js') {
-            let f = require(p + "/" + pth + "/" + file)
-            ps.push([
-              './' + pth,
-              f.name,
-              f.description,
-              f.version,
-            ])
-          }
-        })
-      })
-      console.log(ps.toString())
-    }
-  }
-}
 
 program
   .command('ls')
@@ -896,5 +846,3 @@ program.parse(process.argv)
 if (!process.argv.slice(2).length) {
   program.outputHelp()
 }
-
-init()
