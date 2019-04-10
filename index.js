@@ -825,7 +825,7 @@ program
 
 program
   .command('stop [action]')
-  .action(function() {
+  .action(function(action) {
     if (action === 'write') {
       stop.planaria(function() {
         console.log("Stopped Planaria")
