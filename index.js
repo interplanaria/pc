@@ -137,7 +137,7 @@ const rewind = function(height, addrs, cb) {
 }
 const logs = {
   _run: function(action, size) {
-    docker.listContainers(function (err, containers) {
+    docker.listContainers({ all: true }, function (err, containers) {
       if (containers.length > 0) {
         let cs = containers.filter(function(item) {
           return item.Image.startsWith(images[action])
@@ -277,6 +277,10 @@ const updateEnv = function(answers, cb) {
   if (!originalEnv.PLANARIUM) {
     console.log("No PLANARIUM env, adding...")
     envs.push("PLANARIUM=interplanaria/planarium")
+  }
+  if (!originalEnv.PLANARIUM_PORT) {
+    console.log("No PLANARIUM_PORT env, adding...")
+    envs.push("PLANARIUM_PORT=3000")
   }
   console.log("envs after = ", envs)
   write.lines(process.cwd(), ".env", envs, null, cb)
@@ -767,7 +771,7 @@ program
 *
 *******************************************/
 program
-  .command('update <action> [version]')
+  .command('update [action] [version]')
   .action(function(action, version) {
     if (action === 'write') {
       // write => planaria
