@@ -20,6 +20,10 @@ services:
       - planaria
     ports:
       - "${PLANARIUM_PORT}:3000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
 networks:
   planaria:
     external:
